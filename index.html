@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Contact QR Code Generator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f9fafc;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 {
+    color: #2369f2;
+    margin-bottom: 1rem;
+  }
+  form {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-width: 400px;
+    width: 100%;
+  }
+  label {
+    display: block;
+    margin-top: 1rem;
+    font-weight: bold;
+  }
+  input, textarea {
+    width: 100%;
+    padding: 0.6rem;
+    margin-top: 0.3rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+  button {
+    margin-top: 1.5rem;
+    padding: 0.7rem;
+    width: 100%;
+    font-size: 1rem;
+    background: #2369f2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #154bbf;
+  }
+  #qrcode {
+    margin-top: 2rem;
+  }
+  #download-btn {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: none;
+  }
+  #download-btn:hover {
+    background: #218838;
+  }
+</style>
+</head>
+<body>
+
+<h1>Contact QR Code Generator</h1>
+<form id="contact-form">
+  <label for="name">Full Name</label>
+  <input type="text" id="name" required />
+
+  <label for="phone">Phone Number</label>
+  <input type="tel" id="phone" required />
+
+  <label for="email">Email Address</label>
+  <input type="email" id="email" />
+
+  <label for="address">Address</label>
+  <textarea id="address" rows="2"></textarea>
+
+  <button type="submit">Generate QR Code</button>
+</form>
+
+<div id="qrcode"></div>
+<button id="download-btn">Download QR Code</button>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script>
+  const form = document.getElementById('contact-form');
+  const qrContainer = document.getElementById('qrcode');
+  const downloadBtn = document.getElementById('download-btn');
+
+  function generateVCard(name, phone, email, address) {
+    return `BEGIN:VCARD
+VERSION:3.0
+FN:${name}
+TEL;TYPE=CELL:${phone}
+EMAIL:${email}
+ADR;TYPE=HOME:;;${address.replace(/\n/g, ';')}
+END:VCARD`;
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    qrContainer.innerHTML = '';
+    downloadBtn.style.display = 'none';
+
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const address = document.getElementById('address').value.trim();
+
+    const vcard = generateVCard(name, phone, email, address);
+
+    QRCode.toCanvas(vcard, { width: 200 }, function (error, canvas) {
+      if (error) {
+        alert('Error generating QR code');
+        return;
+      }
+      qrContainer.appendChild(canvas);
+      downloadBtn.style.display = 'inline-block';
+
+      downloadBtn.onclick = () => {
+        const link = document.createElement('a');
+        link.download = 'contact_qrcode.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      };
+    });
+  });
+</script>
+
+</body>
+</html>
